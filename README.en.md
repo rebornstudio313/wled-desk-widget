@@ -12,6 +12,7 @@ The browser preview is tested. Native Windows features must be validated separat
 ## Features
 
 - Add devices by local IP or .local hostname; restore saved devices on startup.
+- Named indicators show lights on, lights off, connecting or offline. No demonstration mode.
 - Control a selected device or all devices: power, RGB/HEX, brightness, effect speed/intensity.
 - Work / Evening / Cinema scenes: per-device presets or custom parameters.
 - Peek strips on both edges, with independent source selection.
@@ -27,7 +28,7 @@ pnpm preview
 ```
 
 Requires Node.js 24 and pnpm 11.25.0. Open `http://127.0.0.1:1421`, add your own WLED
-addresses in Settings. With an empty registry, the app starts in demo mode.
+addresses in Settings. With an empty registry, the app prompts you to add your first WLED device.
 
 ## Build Windows installer
 
