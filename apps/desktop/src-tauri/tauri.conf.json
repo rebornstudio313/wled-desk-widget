@@ -16,11 +16,12 @@
         "height": 470,
         "minWidth": 308,
         "minHeight": 180,
-        "resizable": true,
+        "resizable": false,
         "decorations": false,
         "transparent": true,
         "shadow": false,
-        "backgroundColor": "#00000000"
+        "backgroundColor": "#00000000",
+        "maximizable": false
       }
     ],
     "security": {
