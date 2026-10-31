@@ -200,3 +200,41 @@ html[data-shell="native"] .layout,html[data-shell="native"] .widget{width:320px;
    Clip all CSS painting to the same rounded contour as the glass panel. */
 html[data-shell="native"],html[data-shell="native"] body{overflow:hidden}
 html[data-shell="native"] .widget{box-shadow:inset 0 1px 1px #9bd8ff26,inset 0 -1px 1px #9f6bf22b;clip-path:inset(0 round 16px)}
+
+.device-status-list{display:flex;align-items:center;gap:8px;width:100%;min-width:0}
+.device-status{display:inline-flex;align-items:center;gap:3px;min-width:0;flex:0 1 auto;color:#d9ebfa;font-size:12px;line-height:18px}
+.device-status>.app-icon{width:16px;height:16px;flex-shrink:0;color:#bceaff}
+.device-status>i{width:5px;height:5px;border-radius:50%;background:#8da4bc;flex-shrink:0}
+.device-status[data-state="on"]>i{background:#32e7a0;box-shadow:0 0 4px #32e7a055}
+.device-status[data-state="offline"]>i{background:#ff997a}
+.device-status[data-state="off"]{color:#9eafc4}
+.device-status>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.no-devices-status{color:#adc5dd;font-size:12px}.side>.settings{margin-top:0}
+
+/* Small labels remain readable; only the dot itself may use a small glyph. */
+.widget-status>.no-devices-status{font-size:13px;line-height:18px;color:#c8deef}
+.device-status{font-size:13px;line-height:18px}
+.settings label,.settings input,.settings button,.side p{font-size:13px;line-height:18px}
+.eyebrow{font-size:11px;line-height:16px;letter-spacing:.6px}
+/* Glass scrollbar shared by settings, scenes, lists and overflowing notices. */
+*{scrollbar-width:thin;scrollbar-color:#249fcf #10243a}
+@supports selector(::-webkit-scrollbar){
+ *{scrollbar-width:auto;scrollbar-color:auto}
+ ::-webkit-scrollbar{width:6px;height:6px}
+ ::-webkit-scrollbar-track{background:#10243a88;border-radius:9px}
+ ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#13bff1,#6b6ed2);border:1px solid #8cddff44;border-radius:9px;min-height:28px;min-width:28px}
+ ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#62d9ff,#a98cea)}
+ ::-webkit-scrollbar-button{display:none;width:0;height:0}
+ ::-webkit-scrollbar-corner{background:transparent}
+}
+
+.effect-picker{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;min-width:0;border:1px solid #3e5e7b;border-radius:7px;background:#102940;color:#f5faff;padding:5px 4px;font-size:13px;line-height:17px;font-weight:500;text-align:left}
+.effect-picker>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.effect-picker>svg{width:13px;height:13px;fill:none;stroke:#d1efff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.effect-picker[aria-expanded="true"]{border-color:#24c6fa;box-shadow:0 0 9px #00baff33}
+.effect-options{position:fixed;z-index:100;overflow-y:auto;overscroll-behavior:contain;border:1px solid #3ca8d4;border-bottom-color:#9364ce;border-radius:10px;padding:4px;background:linear-gradient(145deg,#102e48fa,#1e2140fa);backdrop-filter:blur(24px);box-shadow:0 5px 20px #0006;outline:none}
+.effect-options>button{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;padding:6px 8px;min-height:30px;border:1px solid transparent;border-radius:6px;background:transparent;color:#ecf5ff;font-size:13px;line-height:18px;text-align:left}
+.effect-options>button.focused{background:#0875a64d;border-color:#39bde566}
+.effect-options>button[aria-selected="true"]{color:#9eeaff;background:#116e9d55}
+.effect-options>button>span{color:#53dcff}
+.widget[data-compact="true"] .effect-picker{padding:4px 3px}

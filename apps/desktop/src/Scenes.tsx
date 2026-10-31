@@ -19,7 +19,7 @@ export function scenePatch(action:SceneAction,entry:Entry):Patch{
  return {on:action.on,bri:action.bri,seg:[{id:snapshot.state.seg[0].id,fx,col:[[1,3,5].map(i=>parseInt(action.color.slice(i,i+2),16))],sx:action.speed,ix:action.intensity}]};
 }
 type Row={deviceId:string;enabled:boolean;action:SceneAction};
-function Editor({slot,scene,entries,demo,onSave,onClose}:{slot:SceneSlot;scene?:Scene;entries:Entry[];demo:boolean;onSave:(scene:Scene)=>Promise<void>;onClose:()=>void}){
+function Editor({slot,scene,entries,onSave,onClose}:{slot:SceneSlot;scene?:Scene;entries:Entry[];onSave:(scene:Scene)=>Promise<void>;onClose:()=>void}){
  const definition=definitions.find(d=>d.slot===slot)!;
  const [rows,setRows]=useState<Row[]>(()=>{
   const ids=[...new Set([...entries.map(e=>e.device.id),...(scene?.targets.map(t=>t.deviceId)||[])])];
@@ -39,11 +39,11 @@ function Editor({slot,scene,entries,demo,onSave,onClose}:{slot:SceneSlot;scene?:
  function trap(event:React.KeyboardEvent){if(event.key!=='Tab')return;const elements=Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled)')).filter(e=>e.offsetParent!==null);const first=elements[0],last=elements.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
  return createPortal(<div className="scene-backdrop"><section className="scene-editor" role="dialog" aria-modal="true" aria-label={`Настройка сценария ${definition.name}`} onKeyDown={trap}>
  <div className="settings-heading"><h2><Icon kind={slot}/>{definition.name}</h2><button ref={close} aria-label="Закрыть сценарий" disabled={saving} onClick={onClose}>×</button></div>
- <p className="scene-help">Выберите лампы и задайте действие для каждой. Сохранение не меняет свет.{demo?' Демо: настройки останутся в симуляторе.':''}</p>
+ <p className="scene-help">Выберите лампы и задайте действие для каждой. Сохранение не меняет свет.</p>
  <form onSubmit={save}><fieldset disabled={saving} className="scene-form">
  {rows.map(row=>{const entry=entries.find(e=>e.device.id===row.deviceId),a=row.action,snapshot=entry?.snapshot;const presets=Object.entries(snapshot?.presets||{}).filter(([id])=>+id>0&&+id<=250);return <section className="scene-device" key={row.deviceId}>
  <label className="scene-device-label"><input type="checkbox" checked={row.enabled} onChange={e=>update(row.deviceId,{enabled:e.target.checked})}/><Icon kind="lamp"/>{entry?.device.name||'Удалённая лампа'}</label>
- {entry&&<small>{demo?'Симулятор':entry.device.address}{entry.error?' · недоступна':''}</small>}
+ {entry&&<small>{entry.device.address}{entry.error?' · недоступна':''}</small>}
  {row.enabled&&entry&&<><label>Источник<select aria-label={`Источник ${entry.device.name}`} value={a.kind} onChange={e=>update(row.deviceId,{action:e.target.value==='preset'?{kind:'preset',presetId:presets[0]?+presets[0][0]:1}:defaults(slot)})}><option value="custom">Свои параметры</option><option value="preset" disabled={!presets.length&&a.kind!=='preset'}>Пресет WLED{!presets.length?' — нет доступных':''}</option></select></label>
  {a.kind==='preset'?<label>Пресет<select aria-label={`Пресет ${entry.device.name}`} value={a.presetId} onChange={e=>action(row.deviceId,{presetId:+e.target.value})}>{!presets.some(([id])=>+id===a.presetId)&&<option value={a.presetId}>№{a.presetId} — отсутствует / не загружен</option>}{presets.map(([id,p])=><option key={id} value={id}>{p.n||'Пресет'} · №{id}</option>)}</select></label>:<>
  <button type="button" className="scene-current" disabled={!snapshot} onClick={()=>update(row.deviceId,{action:current(entry,slot)})}>Взять текущее состояние</button>
@@ -58,12 +58,12 @@ function Editor({slot,scene,entries,demo,onSave,onClose}:{slot:SceneSlot;scene?:
  <div className="scene-save"><button type="button" onClick={onClose}>Отмена</button><button className="primary" type="submit">{saving?'Сохраняем…':'Сохранить'}</button></div>
  </fieldset></form></section></div>,document.body);
 }
-export function Scenes({entries,demo,busy,onApply}:{entries:Entry[];demo:boolean;busy:boolean;onApply:(make:(entry:Entry)=>Patch,targets:Entry[])=>Promise<void>}){
+export function Scenes({entries,busy,onApply}:{entries:Entry[];busy:boolean;onApply:(make:(entry:Entry)=>Patch,targets:Entry[])=>Promise<void>}){
  const [scenes,setScenes]=useState<Scene[]>([]),[editing,setEditing]=useState<SceneSlot|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[reload,setReload]=useState(0);
- useEffect(()=>{let active=true;setLoaded(false);setError('');setEditing(null);if(demo){setScenes(definitions.map(d=>({slot:d.slot,targets:entries.map(e=>({deviceId:e.device.id,action:defaults(d.slot)}))})));setLoaded(true);}else void bridge.scenes().then(value=>{if(active){setScenes(value);setLoaded(true);}}).catch(e=>{if(active)setError(errorText(e));});return ()=>{active=false;};},[demo,reload]);
- async function save(scene:Scene){const saved=demo?scene:await bridge.saveScene(scene);setScenes(previous=>[...previous.filter(s=>s.slot!==scene.slot),saved]);}
+ useEffect(()=>{let active=true;setLoaded(false);setError('');setEditing(null);void bridge.scenes().then(value=>{if(active){setScenes(value);setLoaded(true);}}).catch(e=>{if(active)setError(errorText(e));});return ()=>{active=false;};},[reload]);
+ async function save(scene:Scene){const saved=await bridge.saveScene(scene);setScenes(previous=>[...previous.filter(s=>s.slot!==scene.slot),saved]);}
  async function activate(slot:SceneSlot){const scene=scenes.find(s=>s.slot===slot);if(!scene?.targets.length){setEditing(slot);return;}const targets=scene.targets.map(t=>entries.find(e=>e.device.id===t.deviceId)||{device:{id:t.deviceId,name:'Удалённая лампа',address:''},error:'Лампа удалена'});await onApply(entry=>scenePatch(scene.targets.find(t=>t.deviceId===entry.device.id)!.action,entry),targets);}
  return <><div className="scenes">{definitions.map(d=>{const configured=!!scenes.find(s=>s.slot===d.slot)?.targets.length;return <div className="scene-tile" key={d.slot}><button className="scene-activate" disabled={!loaded||busy} title={configured?'Применить сохранённый сценарий':'Настроить сценарий'} onClick={()=>void activate(d.slot)}><Icon kind={d.slot}/><span>{d.name}</span></button><button className="scene-edit" disabled={!loaded||busy} aria-label={`Настроить ${d.name}`} title={`Настроить ${d.name}`} onClick={()=>setEditing(d.slot)}><Icon kind="settings"/></button></div>;})}</div>
  {error&&<p className="scene-error" role="alert">{error} <button onClick={()=>setReload(n=>n+1)}>Повторить загрузку</button></p>}
- {editing&&<Editor key={`${demo}-${editing}`} slot={editing} scene={scenes.find(s=>s.slot===editing)} entries={entries} demo={demo} onSave={save} onClose={()=>setEditing(null)}/>}</>;
+ {editing&&<Editor key={editing} slot={editing} scene={scenes.find(s=>s.slot===editing)} entries={entries} onSave={save} onClose={()=>setEditing(null)}/>}</>;
 }

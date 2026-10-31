@@ -3,8 +3,8 @@ import type {ReactNode} from 'react';
 // Original outline family, selected concept 01. All icons share a 24-unit grid.
 const drawings={
  pin:<><path d="m8 3 8 0-1 6 4 4H5l4-4ZM12 13v8"/></>,
- collapse:<><path d="m5 4 7 7 7-7M5 20l7-7 7 7"/></>,
- expand:<><path d="M5 9V4h5m9 11v5h-5M5 4l6 6m8 10-6-6"/></>,
+ collapse:<><path d="M5 9V4h5m9 11v5h-5M5 4l6 6m8 10-6-6"/></>,
+ expand:<><path d="M4 4l6 6M10 5v5H5m15 10-6-6m0 5v-5h5"/></>,
  hide:<><path d="M4 5h16v14H4ZM8 15h8"/></>,
  'power':<><path d="M12 2.5v8.2M6.7 5.1a8.4 8.4 0 1 0 10.6 0"/></>,
  'effects':<><path d="m12.5 2 1.6 4.9L19 8.5l-4.9 1.6-1.6 4.9-1.6-4.9L6 8.5l4.9-1.6Z"/><path d="m5 12 1.1 3.4L9.5 16.5l-3.4 1.1L5 21l-1.1-3.4L.5 16.5l3.4-1.1Zm14 2 1 3 3 1-3 1-1 3-1-3-3-1 3-1Z"/></>,
