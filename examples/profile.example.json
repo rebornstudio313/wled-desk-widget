@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "devices": [
+    {
+      "id": "device-a",
+      "name": "Лампа 1",
+      "address": "http://lamp-a.local"
+    },
+    {
+      "id": "device-b",
+      "name": "Лампа 2",
+      "address": "http://lamp-b.local"
+    }
+  ],
+  "groups": [
+    {
+      "id": "desk",
+      "name": "На столе",
+      "deviceIds": [
+        "device-a",
+        "device-b"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "work",
+      "name": "Работа",
+      "targets": [
+        {
+          "deviceId": "device-a",
+          "kind": "preset",
+          "presetId": 2
+        },
+        {
+          "deviceId": "device-b",
+          "kind": "preset",
+          "presetId": 7
+        }
+      ]
+    }
+  ],
+  "quickSlots": [
+    {
+      "label": "Работа",
+      "sceneId": "work"
+    },
+    {
+      "label": "Вечер",
+      "sceneId": null
+    },
+    {
+      "label": "Кино",
+      "sceneId": null
+    }
+  ],
+  "ui": {
+    "locale": "ru",
+    "alwaysOnTop": false,
+    "startOnLogin": false
+  }
+}

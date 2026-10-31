@@ -1,0 +1,17 @@
+Use case: ui-mockup.
+Create ONE high-resolution landscape image: a professional comparison board showing FIVE alternative coherent icon families for a compact Windows application named "Widget LED RGB". It is a design exploration sheet, not source-code icons. The user wants to choose one family for their existing small translucent dark-blue glass WLED widget.
+
+COMPOSITION: 5 generously spaced horizontal rows, numbered 01, 02, 03, 04, 05. Each row has exactly SEVEN equal-sized beautifully rendered buttons/icons with highly readable Russian captions directly below, in this precise left-to-right order: "Питание", "Эффекты", "Цвет", "Настройки", "Работа", "Вечер", "Кино". Exactly 35 icons total. A clear large header at top: "Widget LED RGB". A smaller header underneath: "5 вариантов иконок". Left of each row is a short style label: row 01 "Контур", row 02 "Мягкие", row 03 "Два тона", row 04 "Силуэт", row 05 "Стекло". No other paragraphs or annotations.
+
+STYLE CONSISTENCY: all rows belong to the same refined dark navy translucent frosted-glass interface, thin cyan-blue outlines, restrained violet accent towards the right, small precise highlights. Background charcoal/navy with a subtle blurred teal and violet wash. Clear legible symbols, crisp edges, no busy texture, no exaggerated bloom. Put every row on its own softly translucent rounded glass strip. Power and settings are matching circular blue glass controls side by side in their positions; other controls can use matching rounded squares/tiles. Make everything large enough to examine: row buttons approximately 64-76px, symbols roughly 30-36px. Do not reproduce tiny unreadable app screenshots.
+
+ICON MEANINGS (seven per row): power = unmistakable standard open circle and vertical stroke; effects = sparkles / magical stars; color = artist palette or multicolor wheel with a small selector dot; settings = clean readable cog with central hole; work = sun or clean focused desk lamp; evening = sun setting behind horizon, warm amber; cinema = a legible clapperboard with film stripes, soft lavender. Keep these meanings across all five rows while noticeably varying the drawing treatment. Power/settings must look like the same family and both use cyan-blue glass.
+
+FIVE DISTINCT FAMILIES:
+01 Контур: refined consistent medium-weight monoline white/cyan symbols, round caps, simple geometry, highly practical at small sizes.
+02 Мягкие: slightly heavier softly rounded strokes, comfortable friendly proportions, stronger contrast.
+03 Два тона: two-tone icon design with crisp white foreground outlines and restrained cyan fill; evening amber, cinema lavender.
+04 Силуэт: simple solid filled silhouettes with deliberate negative spaces, highest recognition at tiny sizes, no fine details.
+05 Стекло: restrained polished luminous glass icons, subtle bevel and depth but maintain clear readable shapes.
+
+TYPOGRAPHY: exceptionally readable real Cyrillic, modern Segoe UI / Inter-like sans serif, medium or semibold, large clean captions in near-white at high contrast, no thin pale low-contrast lettering, no decorative fonts. Align every caption and icon consistently. Precise spelling matters. Design should communicate readable 13-14px labels in the final compact widget, shown enlarged on this comparison board. Only these exact Russian labels plus the application name. No screenshots of code, no windows chrome, no random devices, no logos, no watermarks. Deliver one single polished image with all five rows fully visible, nothing cropped.
