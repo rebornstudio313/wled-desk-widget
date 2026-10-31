@@ -14,8 +14,7 @@ jobs:
           from pathlib import Path, PurePosixPath
           import zipfile
           root = Path.cwd().resolve()
-          archive = root / 'wled-desk-widget-0.1.0-alpha.1-source.zip'
-          with zipfile.ZipFile(archive) as z:
+          with zipfile.ZipFile(root / 'wled-desk-widget-0.1.0-alpha.1-source.zip') as z:
               for item in z.infolist():
                   name = PurePosixPath(item.filename)
                   if not name.parts or name.parts[0] != 'wled-desk-widget' or '..' in name.parts:
@@ -23,6 +22,8 @@ jobs:
                   relative = Path(*name.parts[1:])
                   if not relative.parts or {'.git', '.local', 'node_modules', 'target', 'dist'} & set(relative.parts):
                       raise ValueError('Private or invalid path')
+                  if relative.parts[:2] == ('.github', 'workflows'):
+                      continue
                   target = root / relative
                   target.parent.mkdir(parents=True, exist_ok=True)
                   target.write_bytes(z.read(item))
