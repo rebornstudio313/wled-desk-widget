@@ -1,0 +1,30 @@
+# Build and dependencies
+node_modules/
+dist/
+target/
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+__pycache__/
+
+# Private local data and credentials
+.local/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+*.p12
+*.backup.json
+cfg.json
+presets.json
+
+# Editor-local settings
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local release artifacts
+release-local/
