@@ -16,7 +16,7 @@ const lamp=http.createServer(async(req,res)=>{
   if(patch.bri!==undefined)state.bri=patch.bri;if(patch.seg)Object.assign(state.seg[0],patch.seg[0]);
   res.end('{"success":true}');return;
  }
- const values={'/json/info':info,'/json/state':state,'/json/eff':['Solid','Breathe','Rainbow'],'/presets.json':{'2':{n:'Fixture preset'}}};
+ const values={'/json/info':info,'/json/state':state,'/json/eff':['Solid','Breathe','Rainbow',...Array.from({length:50},(_,i)=>`Fixture effect ${i+1}`)],'/presets.json':{'2':{n:'Fixture preset'}}};
  res.end(JSON.stringify(values[req.url]||{}));
 });
 await new Promise(r=>lamp.listen(0,'127.0.0.1',r));
@@ -31,6 +31,19 @@ try{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:1423');
  await page.getByLabel('Управление лампами',{exact:true}).waitFor();
+ await page.getByRole('heading',{name:'Добавьте первую лампу'}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'Демо',exact:true}).count(),0,'No demonstration mode in the application');
+ assert.equal(await page.locator('.no-devices-status').evaluate(e=>getComputedStyle(e).fontSize),'13px','Readable empty-state status');
+ await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();
+ 
+ await page.getByRole('heading',{name:'Добавьте первую лампу'}).waitFor();
+ await page.getByLabel('Адрес лампы',{exact:true}).fill(`127.0.0.1:${lamp.address().port}`);
+ await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();
+ await page.locator('.devices').getByRole('button',{name:'Test lamp',exact:true}).waitFor();
+ assert.equal(JSON.parse(await readFile(join(temp,'devices.json'),'utf8')).devices.length,1);
+ await page.getByRole('button',{name:'Закрыть настройки',exact:true}).click();
+ await page.locator('.device-status[data-state="on"]').waitFor();
+ assert.match(await page.locator('.device-status').innerText(),/Test lamp/);
  // HEX and dragging must place the marker at the actual selected hue.
  const ring=page.locator('.hue-wheel'),marker=page.locator('.wheel-marker');
  async function verifyMarker(expectedHue,expectedColor){
@@ -77,13 +90,6 @@ try{
  await page.screenshot({path:resolve(root,'docs/screenshots/prototype-compact.png'),fullPage:true});
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'No horizontal viewport overflow');
  await page.setViewportSize({width:1280,height:1000});
- await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();
- await page.getByRole('button',{name:'Мои лампы',exact:true}).click();
- await page.getByRole('heading',{name:'Добавьте первую лампу'}).waitFor();
- await page.getByLabel('Адрес лампы',{exact:true}).fill(`127.0.0.1:${lamp.address().port}`);
- await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();
- await page.locator('.devices').getByRole('button',{name:'Test lamp',exact:true}).waitFor();
- assert.equal(JSON.parse(await readFile(join(temp,'devices.json'),'utf8')).devices.length,1);
  // A fresh application load must restore saved lamps without opening Settings.
  const beforeReload=structuredClone(state);
  await page.reload();
@@ -96,6 +102,7 @@ try{
  await page.route('**/api/devices/*',route=>route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'Fixture offline'})}));
  await page.reload();
  await page.locator('.devices .dot.offline').waitFor();
+ await page.locator('.device-status[data-state="offline"]').waitFor();
  assert.ok(await page.getByRole('dialog',{name:'Настройки виджета'}).isHidden());
  assert.equal(await page.locator('.devices').getByRole('button',{name:'Test lamp',exact:true}).count(),1);
  assert.ok(await page.getByRole('button',{name:'Питание выбранных ламп'}).isDisabled());
@@ -104,6 +111,7 @@ try{
  await page.getByRole('button',{name:'Питание выбранных ламп'}).click();
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
  assert.equal(state.on,false);
+ await page.locator('.device-status[data-state="off"]').waitFor();
  await page.getByLabel('HEX цвет',{exact:true}).fill('#00bbff');
  await page.getByLabel('HEX цвет',{exact:true}).press('Tab');
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
@@ -116,7 +124,14 @@ try{
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
  assert.deepEqual(state.seg[0].col[0],[128,255,0],'Release sends final selected hue');
  await page.getByRole('tab',{name:/Эффекты/}).click();
- await page.getByLabel('Эффект',{exact:true}).selectOption('Breathe');
+ await page.getByRole('combobox',{name:'Эффект',exact:true}).press('ArrowDown');
+ const effectList=page.getByRole('listbox',{name:'Эффект: список',exact:true});await effectList.waitFor();
+ await effectList.press('End');await page.getByRole('option',{name:'Fixture effect 50',exact:true}).waitFor();
+ assert.ok(await effectList.evaluate(e=>e.scrollTop>0),'Long effect list scrolls to the keyboard selection');
+ assert.equal(await effectList.evaluate(e=>getComputedStyle(e,'::-webkit-scrollbar').width),'6px','Themed narrow scrollbar');
+ await page.screenshot({path:resolve(root,'docs/screenshots/effect-picker.png'),fullPage:true});
+ await effectList.press('Escape');assert.equal(await effectList.count(),0,'Escape closes the picker');
+ await page.getByRole('combobox',{name:'Эффект',exact:true}).click();await page.getByRole('option',{name:'Breathe',exact:true}).click();
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
  assert.equal(state.seg[0].fx,1);
  const forbidden=await fetch('http://127.0.0.1:1423/api/devices',{method:'POST',headers:{Origin:'https://evil.example','Content-Type':'application/json'},body:'{}'});
@@ -126,7 +141,7 @@ try{
  await page.getByRole('heading',{name:'Добавьте первую лампу'}).waitFor();
  assert.equal(JSON.parse(await readFile(join(temp,'devices.json'),'utf8')).devices.length,0);
  assert.deepEqual(errors,[]);
- console.log('UI smoke passed: demo, moving color marker, header settings, compact layout, live add/persistence, automatic startup/reload, offline saved lamps, power, RGB, effects, origin restriction, remove.');
+ console.log('UI smoke passed: real-device onboarding and status, moving color marker, header settings, compact layout, live add/persistence, automatic startup/reload, offline saved lamps, power, RGB, effects, origin restriction, remove.');
 }finally{
  await browser?.close();server?.kill();await new Promise(r=>lamp.close(r));await rm(temp,{recursive:true,force:true});
 }

@@ -9,7 +9,7 @@ let browser,server;
 async function start(){server=spawn(process.execPath,['scripts/server.mjs'],{cwd:root,env:{...process.env,WIDGET_PORT:'1425',WIDGET_PROFILE_FILE:join(temp,'devices.json')},stdio:['ignore','pipe','pipe']});let out='';server.stdout.on('data',v=>out+=v);server.stderr.on('data',v=>out+=v);for(let i=0;i<100&&!out.includes('loopback only');i++)await new Promise(r=>setTimeout(r,50));assert.match(out,/loopback only/);}
 try{
  await start();browser=await chromium.launch({channel:'msedge',headless:true});const page=await browser.newPage({viewport:{width:332,height:470}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:1425');await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();await page.getByRole('button',{name:'Мои лампы',exact:true}).click();
+ await page.goto('http://127.0.0.1:1425');await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();
  for(const lamp of [lamp1,lamp2]){await page.getByLabel('Адрес лампы',{exact:true}).fill(lamp.address);await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();await page.waitForFunction(count=>document.querySelectorAll('.devices .dot').length===count,lamp===lamp1?1:2);}
  await page.getByRole('button',{name:'Закрыть настройки',exact:true}).click();
  await page.getByRole('button',{name:'Настроить Работа',exact:true}).click();

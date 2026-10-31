@@ -16,17 +16,13 @@ try{
  const page=await browser.newPage({viewport:{width:332,height:470},deviceScaleFactor:1}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:1424');
  const toggle=page.getByRole('button',{name:'Предпросмотр ленты Peek'});
- await page.getByLabel('Эффект',{exact:true}).selectOption('Rainbow');
- await page.locator('.widget-status').filter({hasText:'Настройки применены'}).waitFor();
- await toggle.click();await page.locator('.peek-edge[data-status="live"]').first().waitFor();
- await mkdir(resolve(root,'docs/screenshots'),{recursive:true});await page.mouse.click(330,465);
- await page.screenshot({path:resolve(root,'docs/screenshots/prototype-peek.png'),fullPage:true});
- const bounds=await page.getByLabel('Управление лампами',{exact:true}).boundingBox();assert.ok(bounds.width<=321&&bounds.height<=450,JSON.stringify(bounds));
- await toggle.click();assert.equal(await page.locator('.peek-edge').count(),0);
- await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();await page.getByRole('button',{name:'Мои лампы',exact:true}).click();
+ await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();
  async function add(lamp){await page.getByLabel('Адрес лампы',{exact:true}).fill(lamp.address);await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();}
  await add(lamp1);await page.locator('.devices').getByRole('button',{name:'Lamp A',exact:true}).waitFor();await page.getByRole('button',{name:'Закрыть настройки',exact:true}).click();
  await toggle.click();await page.locator('.peek-edge[data-status="live"]').nth(1).waitFor();
+ await mkdir(resolve(root,'docs/screenshots'),{recursive:true});await page.mouse.click(330,465);
+ await page.screenshot({path:resolve(root,'docs/screenshots/prototype-peek.png'),fullPage:true});
+ const bounds=await page.getByLabel('Управление лампами',{exact:true}).boundingBox();assert.ok(bounds.width<=321&&bounds.height<=450,JSON.stringify(bounds));
  assert.equal(lamp1.sockets.size,1,'Both edges share a single upstream socket');
  async function pixels(side){return page.locator('.peek-'+side).evaluate(c=>{const x=c.getContext('2d');return Array.from(x.getImageData(0,0,1,c.height).data);});}
  assert.deepEqual((await pixels('left')).slice(0,4),[255,0,0,255]);assert.deepEqual(await pixels('left'),await pixels('right'));
@@ -51,5 +47,5 @@ try{
  assert.ok([...lamp1.commands,...lamp2.commands].every(c=>JSON.stringify(c)==='{"lv":true}'));
  const forbidden=await fetch('http://127.0.0.1:1424/api/devices/not-a-device/peek',{headers:{Origin:'https://evil.example'}});assert.equal(forbidden.status,403);
  assert.deepEqual(errors,[]);
- console.log('Peek smoke passed: compact demo, actual WS frames, live changes, one/two sources, stalled/recovery, dedup, stop, read-only and Origin checks.');
+ console.log('Peek smoke passed: compact interface, actual WS frames, live changes, one/two sources, stalled/recovery, dedup, stop, read-only and Origin checks.');
 }finally{await browser?.close();server?.kill();await lamp1.close();await lamp2.close();await rm(temp,{recursive:true,force:true});}
