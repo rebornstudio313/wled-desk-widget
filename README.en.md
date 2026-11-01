@@ -1,46 +1,39 @@
 # WLED Desk | Widget
 
-![WLED Desk | Widget](docs/media/github-hero.png)
+[Русский](README.md) · [Windows releases](https://github.com/rebornstudio313/wled-desk-widget/releases)
 
-A compact Windows desktop controller for **WLED on ESP32 and ESP8266**.
-Color, brightness, effects, presets, personal scenes and live LED preview over your LAN.
-This is an independent project, not an official WLED application.
+![Actual application UI](docs/media/github-hero.png)
 
-**Early alpha.** Check [build status](docs/BUILD-STATUS.md) before downloading an installer.
-The browser preview is tested. Native Windows features must be validated separately.
+A compact Windows desktop controller for WLED on ESP32/ESP8266. **0.1.0-alpha.3**, experimental and unsigned; independent from the WLED project.
 
 ## Features
 
-- Add devices by local IP or .local hostname; restore saved devices on startup.
-- Named indicators show lights on, lights off, connecting or offline. No demonstration mode.
-- Control a selected device or all devices: power, RGB/HEX, brightness, effect speed/intensity.
-- Work / Evening / Cinema scenes: per-device presets or custom parameters.
-- Peek strips on both edges, with independent source selection.
-- Persistent compact mode with a small color wheel and essential controls.
-- Local storage; no cloud account, hardware flashing or other RGB software integration.
+- Discover WLED devices on the LAN or add an IP/.local address manually.
+- Individual lamp controls, live online/offline status, per-lamp power switches and local renaming.
+- Color wheel, HEX, brightness, effects and real palette names with color previews.
+- Phone/external changes reflected through WebSocket with polling fallback.
+- Editable Work / Evening / Cinema scenes with per-device presets or custom settings.
+- One-shot state copying to all lamps or a saved set of targets.
+- Live Peek along the edges, transparent unlit pixels and bounded silent reconnection.
+- Full/mini mode, tray, right-click always-on-top, free-area dragging and remembered window position.
+- Live transparency adjustment in a separate compact editor.
+- Global hotkeys with multiple user-defined bindings per action.
+- Optional Windows login launch and start-in-tray preference; disabled by default.
+- Single-instance protection; repeated launch restores the existing window.
+- Version/build identity and on-demand GitHub release checks, with manual installation.
 
-## Run from source
+<p><img src="docs/screenshots/widget-full.png" width="320" alt="Full widget"><img src="docs/screenshots/widget-mini.png" width="320" alt="Mini widget"></p>
 
-```powershell
-pnpm install --frozen-lockfile
-pnpm build
-pnpm preview
-```
+## Install
 
-Requires Node.js 24 and pnpm 11.25.0. Open `http://127.0.0.1:1421`, add your own WLED
-addresses in Settings. With an empty registry, the app prompts you to add your first WLED device.
+Download the installer from a published [GitHub Release](https://github.com/rebornstudio313/wled-desk-widget/releases), install for your Windows account, then add devices in Settings. If no release is published, no public download is available yet. Builds can also be obtained from the manual Windows installer workflow or built from source. Enable login launch only after installing or placing the portable EXE in a permanent location.
 
-## Build Windows installer
+## Limitations
 
-Install Rust 1.99.1 MSVC, Microsoft C++ Build Tools, Windows SDK and WebView2.
-Run `pnpm build:native`. Artifacts and SHA256 checksums are copied to `release-local/`.
-The manual GitHub Actions Windows build uploads artifacts without publishing a Release.
+Main controls edit the first segment and RGB. RGBW/CCT, playlist and segment editors are not implemented. WLED presets apply as stored. Copying is one-shot, not continuous or frame-synchronized. Peek can be taken by another client. Palette samples are visual previews, not live animation; Random Cycle is illustrative. mDNS depends on network multicast support. There is no separate Peek window or hardware/RGB-software integration. A clean-machine Windows/DPI QA pass is still pending; login-launch registration is tested without rebooting Windows.
 
-## Limits
+## Development
 
-Custom scenes currently edit RGB and the first segment; palettes, RGBW/CCT and advanced
-segments are future work. A saved WLED preset is applied as-is. WLED provides Peek to
-only one client per device. Per-device effect IDs are resolved by name. This is not
-frame-accurate hardware synchronization. Browser preview cannot hide in the system tray.
+Node 24 and pnpm 11.25.0: `pnpm install --frozen-lockfile`, `pnpm check`, `pnpm build`, `pnpm preview`. Preview is loopback-only on port 1421. UI tests require Edge: `pnpm test:ui`. Native builds additionally require Rust MSVC, Windows SDK and C++ Build Tools: `pnpm build:native`. Build outputs and local profiles are excluded from source. Actual screenshots use isolated test fixtures, not personal device data.
 
-[Russian documentation](README.md) · [MIT license](LICENSE) · [Build guide](docs/BUILD-WINDOWS.md).
+[MIT](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md) and [build status](docs/BUILD-STATUS.md).

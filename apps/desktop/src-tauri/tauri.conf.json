@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "WLED Desk Widget",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.3",
   "identifier": "io.wleddesk.app",
   "build": {
     "beforeDevCommand": "pnpm exec vite",
@@ -21,7 +21,8 @@
         "transparent": true,
         "shadow": false,
         "backgroundColor": "#00000000",
-        "maximizable": false
+        "maximizable": false,
+        "visible": false
       }
     ],
     "security": {
@@ -49,7 +50,8 @@
           "Russian",
           "English"
         ],
-        "displayLanguageSelector": true
+        "displayLanguageSelector": true,
+        "installerHooks": "installer/hooks.nsh"
       },
       "webviewInstallMode": {
         "type": "downloadBootstrapper"

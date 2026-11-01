@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {bridge} from './bridge';
 import {Icon} from './Icon';
+import {SceneArtwork} from './SceneArtwork';
 import type {Entry,Patch,Scene,SceneAction,SceneSlot} from './model';
 const definitions=[{slot:'work',name:'Работа',color:'#c9eaff',bri:230},{slot:'evening',name:'Вечер',color:'#ff9e52',bri:115},{slot:'cinema',name:'Кино',color:'#7155ff',bri:64}] as const;
 const errorText=(e:unknown)=>e instanceof Error?e.message:'Не удалось сохранить сценарий';
@@ -22,7 +23,7 @@ type Row={deviceId:string;enabled:boolean;action:SceneAction};
 function Editor({slot,scene,entries,onSave,onClose}:{slot:SceneSlot;scene?:Scene;entries:Entry[];onSave:(scene:Scene)=>Promise<void>;onClose:()=>void}){
  const definition=definitions.find(d=>d.slot===slot)!;
  const [rows,setRows]=useState<Row[]>(()=>{
-  const ids=[...new Set([...entries.map(e=>e.device.id),...(scene?.targets.map(t=>t.deviceId)||[])])];
+  const ids=entries.map(e=>e.device.id);
   return ids.map(deviceId=>({deviceId,enabled:scene?scene.targets.some(t=>t.deviceId===deviceId):true,action:structuredClone(scene?.targets.find(t=>t.deviceId===deviceId)?.action||defaults(slot))}));
  });
  const [saving,setSaving]=useState(false),[error,setError]=useState('');const close=useRef<HTMLButtonElement>(null);
@@ -41,7 +42,7 @@ function Editor({slot,scene,entries,onSave,onClose}:{slot:SceneSlot;scene?:Scene
  <div className="settings-heading"><h2><Icon kind={slot}/>{definition.name}</h2><button ref={close} aria-label="Закрыть сценарий" disabled={saving} onClick={onClose}>×</button></div>
  <p className="scene-help">Выберите лампы и задайте действие для каждой. Сохранение не меняет свет.</p>
  <form onSubmit={save}><fieldset disabled={saving} className="scene-form">
- {rows.map(row=>{const entry=entries.find(e=>e.device.id===row.deviceId),a=row.action,snapshot=entry?.snapshot;const presets=Object.entries(snapshot?.presets||{}).filter(([id])=>+id>0&&+id<=250);return <section className="scene-device" key={row.deviceId}>
+ {rows.filter(row=>entries.some(e=>e.device.id===row.deviceId)).map(row=>{const entry=entries.find(e=>e.device.id===row.deviceId),a=row.action,snapshot=entry?.snapshot;const presets=Object.entries(snapshot?.presets||{}).filter(([id])=>+id>0&&+id<=250);return <section className="scene-device" key={row.deviceId}>
  <label className="scene-device-label"><input type="checkbox" checked={row.enabled} onChange={e=>update(row.deviceId,{enabled:e.target.checked})}/><Icon kind="lamp"/>{entry?.device.name||'Удалённая лампа'}</label>
  {entry&&<small>{entry.device.address}{entry.error?' · недоступна':''}</small>}
  {row.enabled&&entry&&<><label>Источник<select aria-label={`Источник ${entry.device.name}`} value={a.kind} onChange={e=>update(row.deviceId,{action:e.target.value==='preset'?{kind:'preset',presetId:presets[0]?+presets[0][0]:1}:defaults(slot)})}><option value="custom">Свои параметры</option><option value="preset" disabled={!presets.length&&a.kind!=='preset'}>Пресет WLED{!presets.length?' — нет доступных':''}</option></select></label>
@@ -62,8 +63,8 @@ export function Scenes({entries,busy,onApply}:{entries:Entry[];busy:boolean;onAp
  const [scenes,setScenes]=useState<Scene[]>([]),[editing,setEditing]=useState<SceneSlot|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[reload,setReload]=useState(0);
  useEffect(()=>{let active=true;setLoaded(false);setError('');setEditing(null);void bridge.scenes().then(value=>{if(active){setScenes(value);setLoaded(true);}}).catch(e=>{if(active)setError(errorText(e));});return ()=>{active=false;};},[reload]);
  async function save(scene:Scene){const saved=await bridge.saveScene(scene);setScenes(previous=>[...previous.filter(s=>s.slot!==scene.slot),saved]);}
- async function activate(slot:SceneSlot){const scene=scenes.find(s=>s.slot===slot);if(!scene?.targets.length){setEditing(slot);return;}const targets=scene.targets.map(t=>entries.find(e=>e.device.id===t.deviceId)||{device:{id:t.deviceId,name:'Удалённая лампа',address:''},error:'Лампа удалена'});await onApply(entry=>scenePatch(scene.targets.find(t=>t.deviceId===entry.device.id)!.action,entry),targets);}
- return <><div className="scenes">{definitions.map(d=>{const configured=!!scenes.find(s=>s.slot===d.slot)?.targets.length;return <div className="scene-tile" key={d.slot}><button className="scene-activate" disabled={!loaded||busy} title={configured?'Применить сохранённый сценарий':'Настроить сценарий'} onClick={()=>void activate(d.slot)}><Icon kind={d.slot}/><span>{d.name}</span></button><button className="scene-edit" disabled={!loaded||busy} aria-label={`Настроить ${d.name}`} title={`Настроить ${d.name}`} onClick={()=>setEditing(d.slot)}><Icon kind="settings"/></button></div>;})}</div>
+ async function activate(slot:SceneSlot){const scene=scenes.find(s=>s.slot===slot);if(!scene?.targets.length){setEditing(slot);return;}const targets=entries.filter(e=>scene.targets.some(t=>t.deviceId===e.device.id));if(!targets.length){setEditing(slot);return;}await onApply(entry=>scenePatch(scene.targets.find(t=>t.deviceId===entry.device.id)!.action,entry),targets);}
+ return <><div className="scenes">{definitions.map(d=>{const configured=!!scenes.find(s=>s.slot===d.slot)?.targets.some(t=>entries.some(e=>e.device.id===t.deviceId));return <div className={'scene-tile scene-tile--'+d.slot} key={d.slot}><button className="scene-activate" disabled={!loaded||busy} title={configured?'Применить сохранённый сценарий':'Настроить сценарий'} onClick={()=>void activate(d.slot)}><SceneArtwork slot={d.slot}/><span>{d.name}</span></button><button className="scene-edit" disabled={!loaded||busy} aria-label={`Настроить ${d.name}`} title={`Настроить ${d.name}`} onClick={()=>setEditing(d.slot)}><Icon kind="settings"/></button></div>;})}</div>
  {error&&<p className="scene-error" role="alert">{error} <button onClick={()=>setReload(n=>n+1)}>Повторить загрузку</button></p>}
  {editing&&<Editor key={editing} slot={editing} scene={scenes.find(s=>s.slot===editing)} entries={entries} onSave={save} onClose={()=>setEditing(null)}/>}</>;
 }

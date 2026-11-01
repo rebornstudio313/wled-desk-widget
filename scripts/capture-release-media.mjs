@@ -19,17 +19,19 @@ try{
  browser=await chromium.launch({channel:'msedge',headless:true});
  const page=await browser.newPage({viewport:{width:332,height:470},deviceScaleFactor:1});
  await page.goto('http://127.0.0.1:1427');await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();
- for(const lamp of lamps){await page.getByLabel('Адрес лампы',{exact:true}).fill(lamp.address);await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();await page.locator('.devices').getByRole('button',{name:'Лампа '+(lamps.indexOf(lamp)+1),exact:true}).waitFor();}
+ for(const lamp of lamps){await page.getByLabel('Адрес лампы',{exact:true}).fill(lamp.address);await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();await page.locator('.device-record').filter({hasText:'Лампа '+(lamps.indexOf(lamp)+1)}).waitFor();}
  await page.getByRole('button',{name:'Закрыть настройки',exact:true}).click();
- await page.locator('.device-status[data-state="on"]').nth(1).waitFor();
+ await page.waitForFunction(()=>document.querySelector('.power-toggle')?.disabled===false);await page.waitForFunction(()=>document.querySelector('.effect-select button')?.textContent.includes('Rainbow'));
  await mkdir('docs/screenshots',{recursive:true});
  const panel=page.locator('.widget');
  await panel.screenshot({path:resolve('docs/screenshots/prototype-compact.png')});
  await panel.screenshot({path:resolve('docs/screenshots/prototype-demo.png')});
- await page.getByRole('button',{name:'Предпросмотр ленты Peek'}).click();await page.locator('.peek-edge[data-status="live"]').nth(1).waitFor();
+ await page.locator('.peek-edge[data-status="live"]').nth(1).waitFor();
  await panel.screenshot({path:resolve('docs/screenshots/prototype-peek.png')});
+ await panel.screenshot({path:resolve('docs/screenshots/widget-full.png')});
  await page.getByRole('button',{name:'Компактный режим',exact:true}).click();
  await panel.screenshot({path:resolve('docs/screenshots/compact-controls.png')});
+ await panel.screenshot({path:resolve('docs/screenshots/widget-mini.png')});
  await page.getByRole('button',{name:'Развернуть виджет',exact:true}).click();
  await page.getByRole('combobox',{name:'Эффект',exact:true}).click();
  await page.getByRole('listbox',{name:'Эффект: список',exact:true}).waitFor();
@@ -38,5 +40,8 @@ try{
  await page.getByRole('button',{name:'Настроить Вечер',exact:true}).click();
  await page.getByRole('dialog',{name:'Настройка сценария Вечер',exact:true}).waitFor();
  await page.screenshot({path:resolve('docs/screenshots/scene-editor.png')});
+ await page.getByRole('button',{name:'Закрыть сценарий',exact:true}).click();
+ await page.evaluate(()=>{document.body.style.background='#f4f4f4';});
+ await panel.screenshot({path:resolve('docs/screenshots/widget-light-background.png')});
  console.log('Captured six current UI images with two isolated WLED fixtures.');
 }finally{await browser?.close();server?.kill();for(const lamp of lamps)await lamp.close();await rm(temp,{recursive:true,force:true});}

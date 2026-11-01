@@ -10,6 +10,9 @@ WLED Desk | Widget — независимый проект. Не являетс�
 | React / React DOM | MIT |
 | Tauri / Tauri API / CLI | MIT или Apache-2.0 |
 | Rust, Tokio, Reqwest, Serde, futures-util, tokio-tungstenite | лицензии upstream; см. метаданные Cargo |
+| mdns-sd | Apache-2.0 или MIT; см. лицензию upstream в инвентаре |
+| tauri-plugin-single-instance | MIT или Apache-2.0 |
+| auto-launch | MIT |
 | Vite | MIT |
 | TypeScript | Apache-2.0 |
 | pnpm | MIT |

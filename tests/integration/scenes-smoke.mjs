@@ -10,7 +10,7 @@ async function start(){server=spawn(process.execPath,['scripts/server.mjs'],{cwd
 try{
  await start();browser=await chromium.launch({channel:'msedge',headless:true});const page=await browser.newPage({viewport:{width:332,height:470}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:1425');await page.getByRole('button',{name:'Настройки ламп',exact:true}).click();
- for(const lamp of [lamp1,lamp2]){await page.getByLabel('Адрес лампы',{exact:true}).fill(lamp.address);await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();await page.waitForFunction(count=>document.querySelectorAll('.devices .dot').length===count,lamp===lamp1?1:2);}
+ for(const lamp of [lamp1,lamp2]){await page.getByLabel('Адрес лампы',{exact:true}).fill(lamp.address);await page.locator('form').getByRole('button',{name:'＋ Добавить лампу',exact:true}).click();await page.locator('.device-record').filter({hasText:lamp===lamp1?'Lamp A':'Lamp B'}).waitFor();}
  await page.getByRole('button',{name:'Закрыть настройки',exact:true}).click();
  await page.getByRole('button',{name:'Настроить Работа',exact:true}).click();
  await page.getByLabel('HEX сценария Lamp A').fill('#112233');await page.getByLabel('Эффект сценария Lamp A').selectOption('Rainbow');
@@ -21,7 +21,7 @@ try{
  assert.equal(lamp1.patches.length+lamp2.patches.length,0,'Saving must not change lights');
  const data=JSON.parse(await readFile(join(temp,'scenes.json'),'utf8'));assert.equal(data.scenes[0].targets.length,2);
  // Restart the backend as well as the page: assignments must come back from disk.
- await new Promise(resolve=>{server.once('exit',resolve);server.kill();});await start();await page.reload();await page.waitForFunction(()=>document.querySelectorAll('.devices .dot').length===2);
+ await new Promise(resolve=>{server.once('exit',resolve);server.kill();});await start();await page.reload();await page.waitForFunction(()=>document.querySelector('.power-toggle')?.disabled===false);
  await page.getByRole('button',{name:'Работа',exact:true}).click();await page.locator('.widget-status').filter({hasText:'Настройки применены'}).waitFor();
  assert.deepEqual(lamp1.patches[0],{on:true,bri:255,seg:[{id:0,fx:1,col:[[17,34,51]],sx:255,ix:0}]});assert.deepEqual(lamp2.patches[0],{ps:7});
  await page.getByRole('button',{name:'Настроить Вечер',exact:true}).click();for(const name of ['Lamp A','Lamp B'])await page.getByLabel('Эффект сценария '+name).selectOption('Rainbow');

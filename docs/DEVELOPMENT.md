@@ -38,3 +38,5 @@ Preview хранит реестр в `.local/preview-devices.json`, сценар
 См. [BUILD-WINDOWS.md](BUILD-WINDOWS.md), [BUILD-STATUS.md](BUILD-STATUS.md).
 Кнопки трея и закрепления поверх окон работают в Tauri; в браузере они отключены.
 Подробности: [WINDOW-MODES.md](WINDOW-MODES.md), [SCENES.md](SCENES.md), [PEEK.md](PEEK.md).
+
+Потоковые состояния и резервный опрос: [REALTIME.md](REALTIME.md).

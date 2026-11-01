@@ -38,9 +38,20 @@
 | rust | alloc-stdlib | 0.3.0 | BSD-3-Clause |
 | rust | android_system_properties | 0.1.6 | MIT OR Apache-2.0 |
 | rust | anyhow | 1.0.104 | MIT OR Apache-2.0 |
+| rust | async-broadcast | 0.7.2 | MIT OR Apache-2.0 |
+| rust | async-channel | 2.5.0 | Apache-2.0 OR MIT |
+| rust | async-executor | 1.14.0 | Apache-2.0 OR MIT |
+| rust | async-io | 2.6.0 | Apache-2.0 OR MIT |
+| rust | async-lock | 3.4.2 | Apache-2.0 OR MIT |
+| rust | async-process | 2.5.0 | Apache-2.0 OR MIT |
+| rust | async-recursion | 1.2.0 | MIT OR Apache-2.0 |
+| rust | async-signal | 0.2.14 | Apache-2.0 OR MIT |
+| rust | async-task | 4.7.1 | Apache-2.0 OR MIT |
+| rust | async-trait | 0.1.92 | MIT OR Apache-2.0 |
 | rust | atk | 0.18.2 | MIT |
 | rust | atk-sys | 0.18.2 | MIT |
 | rust | atomic-waker | 1.1.2 | Apache-2.0 OR MIT |
+| rust | auto-launch | 0.6.0 | MIT |
 | rust | autocfg | 1.5.1 | Apache-2.0 OR MIT |
 | rust | base64 | 0.21.7 | MIT OR Apache-2.0 |
 | rust | base64 | 0.22.1 | MIT OR Apache-2.0 |
@@ -52,6 +63,7 @@
 | rust | block-buffer | 0.10.4 | MIT OR Apache-2.0 |
 | rust | block-buffer | 0.12.1 | MIT OR Apache-2.0 |
 | rust | block2 | 0.6.2 | MIT |
+| rust | blocking | 1.7.0 | Apache-2.0 OR MIT |
 | rust | brotli | 9.1.1 | BSD-3-Clause AND MIT |
 | rust | brotli-decompressor | 6.2.0 | BSD-3-Clause/MIT |
 | rust | bs58 | 0.5.1 | MIT/Apache-2.0 |
@@ -75,6 +87,7 @@
 | rust | chacha20 | 0.10.2 | MIT OR Apache-2.0 |
 | rust | chrono | 0.4.45 | MIT OR Apache-2.0 |
 | rust | combine | 4.6.9 | MIT |
+| rust | concurrent-queue | 2.5.0 | Apache-2.0 OR MIT |
 | rust | const-oid | 0.10.2 | Apache-2.0 OR MIT |
 | rust | cookie | 0.18.2 | MIT OR Apache-2.0 |
 | rust | core-foundation | 0.10.1 | MIT OR Apache-2.0 |
@@ -104,6 +117,7 @@
 | rust | derive_more-impl | 2.1.1 | MIT |
 | rust | digest | 0.10.7 | MIT OR Apache-2.0 |
 | rust | digest | 0.11.3 | MIT OR Apache-2.0 |
+| rust | dirs | 6.0.0 | MIT OR Apache-2.0 |
 | rust | dirs | 7.0.0 | MIT OR Apache-2.0 |
 | rust | dirs-sys | 0.5.0 | MIT OR Apache-2.0 |
 | rust | dispatch2 | 0.3.1 | Zlib OR Apache-2.0 OR MIT |
@@ -118,13 +132,20 @@
 | rust | dyn-clone | 1.0.20 | MIT OR Apache-2.0 |
 | rust | embed-resource | 3.0.12 | MIT |
 | rust | embed_plist | 1.2.2 | MIT OR Apache-2.0 |
+| rust | endi | 1.1.1 | MIT |
+| rust | enumflags2 | 0.7.12 | MIT OR Apache-2.0 |
+| rust | enumflags2_derive | 0.7.12 | MIT OR Apache-2.0 |
 | rust | equivalent | 1.0.3 | Apache-2.0 OR MIT |
 | rust | erased-serde | 0.4.11 | MIT OR Apache-2.0 |
+| rust | errno | 0.3.14 | MIT OR Apache-2.0 |
+| rust | event-listener | 5.4.2 | Apache-2.0 OR MIT |
+| rust | event-listener-strategy | 0.5.4 | Apache-2.0 OR MIT |
 | rust | fastrand | 2.5.0 | Apache-2.0 OR MIT |
 | rust | fdeflate | 0.3.7 | MIT OR Apache-2.0 |
 | rust | field-offset | 0.3.6 | MIT OR Apache-2.0 |
 | rust | find-msvc-tools | 0.1.15 | MIT OR Apache-2.0 |
 | rust | flate2 | 1.1.10 | MIT OR Apache-2.0 |
+| rust | flume | 0.12.0 | Apache-2.0/MIT |
 | rust | fnv | 1.0.7 | Apache-2.0 / MIT |
 | rust | foldhash | 0.2.0 | Zlib |
 | rust | foreign-types | 0.5.0 | MIT/Apache-2.0 |
@@ -135,6 +156,7 @@
 | rust | futures-core | 0.3.34 | MIT OR Apache-2.0 |
 | rust | futures-executor | 0.3.34 | MIT OR Apache-2.0 |
 | rust | futures-io | 0.3.34 | MIT OR Apache-2.0 |
+| rust | futures-lite | 2.6.1 | Apache-2.0 OR MIT |
 | rust | futures-macro | 0.3.34 | MIT OR Apache-2.0 |
 | rust | futures-sink | 0.3.34 | MIT OR Apache-2.0 |
 | rust | futures-task | 0.3.34 | MIT OR Apache-2.0 |
@@ -164,6 +186,7 @@
 | rust | hashbrown | 0.17.1 | MIT OR Apache-2.0 |
 | rust | heck | 0.4.1 | MIT OR Apache-2.0 |
 | rust | heck | 0.5.0 | MIT OR Apache-2.0 |
+| rust | hermit-abi | 0.5.3 | MIT OR Apache-2.0 |
 | rust | hex | 0.4.3 | MIT OR Apache-2.0 |
 | rust | html5ever | 0.39.0 | MIT OR Apache-2.0 |
 | rust | http | 1.5.0 | MIT OR Apache-2.0 |
@@ -187,6 +210,7 @@
 | rust | ident_case | 1.0.1 | MIT/Apache-2.0 |
 | rust | idna | 1.1.0 | MIT OR Apache-2.0 |
 | rust | idna_adapter | 1.2.2 | Apache-2.0 OR MIT |
+| rust | if-addrs | 0.15.0 | MIT OR BSD-3-Clause |
 | rust | image | 0.25.10 | MIT OR Apache-2.0 |
 | rust | indexmap | 1.9.3 | Apache-2.0 OR MIT |
 | rust | indexmap | 2.14.2 | Apache-2.0 OR MIT |
@@ -214,11 +238,13 @@
 | rust | libdbus-sys | 0.2.7 | Apache-2.0/MIT |
 | rust | libloading | 0.7.4 | ISC |
 | rust | libredox | 0.1.25 | MIT |
+| rust | linux-raw-sys | 0.12.1 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT |
 | rust | litemap | 0.8.3 | Unicode-3.0 |
 | rust | lock_api | 0.4.14 | MIT OR Apache-2.0 |
 | rust | log | 0.4.35 | MIT OR Apache-2.0 |
 | rust | lru-slab | 0.1.3 | MIT OR Apache-2.0 OR Zlib |
 | rust | markup5ever | 0.39.0 | MIT OR Apache-2.0 |
+| rust | mdns-sd | 0.21.1 | Apache-2.0 OR MIT |
 | rust | memchr | 2.8.3 | Unlicense OR MIT |
 | rust | memoffset | 0.9.1 | MIT |
 | rust | mime | 0.3.17 | MIT OR Apache-2.0 |
@@ -231,6 +257,7 @@
 | rust | ndk-context | 0.1.1 | MIT OR Apache-2.0 |
 | rust | ndk-sys | 0.6.0+11769913 | MIT OR Apache-2.0 |
 | rust | new_debug_unreachable | 1.0.6 | MIT |
+| rust | nix | 0.31.3 | MIT |
 | rust | num-conv | 0.2.2 | MIT OR Apache-2.0 |
 | rust | num-traits | 0.2.19 | MIT OR Apache-2.0 |
 | rust | num_enum | 0.7.6 | BSD-3-Clause OR MIT OR Apache-2.0 |
@@ -249,13 +276,18 @@
 | rust | objc2-foundation | 0.3.2 | MIT |
 | rust | objc2-io-surface | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
 | rust | objc2-quartz-core | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
+| rust | objc2-security | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
+| rust | objc2-service-management | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
 | rust | objc2-ui-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
 | rust | objc2-user-notifications | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
 | rust | objc2-web-kit | 0.3.2 | Zlib OR Apache-2.0 OR MIT |
 | rust | once_cell | 1.21.4 | MIT OR Apache-2.0 |
 | rust | option-ext | 0.2.0 | MPL-2.0 |
+| rust | ordered-stream | 0.2.0 | MIT OR Apache-2.0 |
+| rust | os_info | 3.15.0 | MIT |
 | rust | pango | 0.18.3 | MIT |
 | rust | pango-sys | 0.18.0 | MIT |
+| rust | parking | 2.2.1 | Apache-2.0 OR MIT |
 | rust | parking_lot | 0.12.5 | MIT OR Apache-2.0 |
 | rust | parking_lot_core | 0.9.12 | MIT OR Apache-2.0 |
 | rust | percent-encoding | 2.3.2 | MIT OR Apache-2.0 |
@@ -265,9 +297,11 @@
 | rust | phf_macros | 0.13.1 | MIT |
 | rust | phf_shared | 0.13.1 | MIT |
 | rust | pin-project-lite | 0.2.17 | Apache-2.0 OR MIT |
+| rust | piper | 0.2.5 | MIT OR Apache-2.0 |
 | rust | pkg-config | 0.3.34 | MIT OR Apache-2.0 |
 | rust | plist | 1.10.3 | MIT |
 | rust | png | 0.18.1 | MIT OR Apache-2.0 |
+| rust | polling | 3.11.0 | Apache-2.0 OR MIT |
 | rust | portable-atomic | 1.15.0 | Apache-2.0 OR MIT |
 | rust | portable-atomic-util | 0.2.8 | Apache-2.0 OR MIT |
 | rust | potential_utf | 0.1.6 | Unicode-3.0 |
@@ -303,6 +337,7 @@
 | rust | ring | 0.17.14 | Apache-2.0 AND ISC |
 | rust | rustc-hash | 2.1.3 | Apache-2.0 OR MIT |
 | rust | rustc_version | 0.4.1 | MIT OR Apache-2.0 |
+| rust | rustix | 1.1.6 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT |
 | rust | rustls | 0.23.46 | Apache-2.0 OR ISC OR MIT |
 | rust | rustls-pki-types | 1.15.1 | MIT OR Apache-2.0 |
 | rust | rustls-webpki | 0.103.16 | ISC |
@@ -334,14 +369,18 @@
 | rust | sha1 | 0.11.0 | MIT OR Apache-2.0 |
 | rust | sha2 | 0.10.9 | MIT OR Apache-2.0 |
 | rust | shlex | 2.0.1 | MIT OR Apache-2.0 |
+| rust | signal-hook-registry | 1.4.8 | MIT OR Apache-2.0 |
 | rust | simd-adler32 | 0.3.10 | MIT |
 | rust | siphasher | 1.0.4 | MIT OR Apache-2.0 |
 | rust | slab | 0.4.12 | MIT |
 | rust | smallvec | 1.16.4 | MIT OR Apache-2.0 |
+| rust | smappservice-rs | 0.1.3 | MIT |
+| rust | socket-pktinfo | 0.4.1 | MIT |
 | rust | socket2 | 0.6.5 | MIT OR Apache-2.0 |
 | rust | softbuffer | 0.4.8 | MIT OR Apache-2.0 |
 | rust | soup3 | 0.5.0 | MIT |
 | rust | soup3-sys | 0.5.0 | MIT |
+| rust | spin | 0.9.9 | MIT |
 | rust | stable_deref_trait | 1.2.1 | MIT OR Apache-2.0 |
 | rust | static_vcruntime | 3.0.0 | MIT OR Apache-2.0 OR Zlib |
 | rust | string_cache | 0.9.0 | MIT OR Apache-2.0 |
@@ -362,10 +401,12 @@
 | rust | tauri-build | 2.7.4 | Apache-2.0 OR MIT |
 | rust | tauri-codegen | 2.7.4 | Apache-2.0 OR MIT |
 | rust | tauri-macros | 2.7.4 | Apache-2.0 OR MIT |
+| rust | tauri-plugin-single-instance | 2.5.5 | Apache-2.0 OR MIT |
 | rust | tauri-runtime | 2.12.2 | Apache-2.0 OR MIT |
 | rust | tauri-runtime-wry | 2.12.3 | Apache-2.0 OR MIT |
 | rust | tauri-utils | 2.10.2 | Apache-2.0 OR MIT |
 | rust | tauri-winres | 0.3.7 | MIT |
+| rust | tempfile | 3.27.0 | MIT OR Apache-2.0 |
 | rust | tendril | 0.5.1 | MIT OR Apache-2.0 |
 | rust | thiserror | 1.0.69 | MIT OR Apache-2.0 |
 | rust | thiserror | 2.0.21 | MIT OR Apache-2.0 |
@@ -394,12 +435,14 @@
 | rust | tower-layer | 0.3.3 | MIT |
 | rust | tower-service | 0.3.3 | MIT |
 | rust | tracing | 0.1.44 | MIT |
+| rust | tracing-attributes | 0.1.31 | MIT |
 | rust | tracing-core | 0.1.36 | MIT |
 | rust | tray-icon | 0.25.1 | MIT OR Apache-2.0 |
 | rust | try-lock | 0.2.5 | MIT |
 | rust | tungstenite | 0.30.0 | MIT OR Apache-2.0 |
 | rust | typeid | 1.0.3 | MIT OR Apache-2.0 |
 | rust | typenum | 1.20.1 | MIT OR Apache-2.0 |
+| rust | uds_windows | 1.2.1 | MIT |
 | rust | unicode-ident | 1.0.27 | (MIT OR Apache-2.0) AND Unicode-3.0 |
 | rust | unicode-segmentation | 1.13.3 | MIT OR Apache-2.0 |
 | rust | untrusted | 0.9.0 | ISC |
@@ -445,6 +488,7 @@
 | rust | windows-interface | 0.59.3 | MIT OR Apache-2.0 |
 | rust | windows-link | 0.2.1 | MIT OR Apache-2.0 |
 | rust | windows-numerics | 0.3.1 | MIT OR Apache-2.0 |
+| rust | windows-registry | 0.6.1 | MIT OR Apache-2.0 |
 | rust | windows-result | 0.4.1 | MIT OR Apache-2.0 |
 | rust | windows-strings | 0.5.1 | MIT OR Apache-2.0 |
 | rust | windows-sys | 0.45.0 | MIT OR Apache-2.0 |
@@ -479,6 +523,10 @@
 | rust | x11-dl | 2.21.0 | MIT |
 | rust | yoke | 0.8.4 | Unicode-3.0 |
 | rust | yoke-derive | 0.8.4 | Unicode-3.0 |
+| rust | zbus | 5.19.0 | MIT |
+| rust | zbus_macros | 5.19.0 | MIT |
+| rust | zbus_names | 4.3.5 | MIT |
+| rust | zcheapstr | 1.2.0 | MIT |
 | rust | zerofrom | 0.1.8 | Unicode-3.0 |
 | rust | zerofrom-derive | 0.1.8 | Unicode-3.0 |
 | rust | zeroize | 1.9.1 | Apache-2.0 OR MIT |
@@ -487,6 +535,9 @@
 | rust | zerovec-derive | 0.11.7 | Unicode-3.0 |
 | rust | zlib-rs | 0.6.8 | Zlib |
 | rust | zmij | 1.0.23 | MIT |
+| rust | zvariant | 5.15.1 | MIT |
+| rust | zvariant_derive | 5.15.1 | MIT |
+| rust | zvariant_utils | 4.2.0 | MIT |
 
 ## Проверить вручную
 
@@ -514,6 +565,8 @@
 - rust: objc2-foundation 0.3.2
 - rust: objc2-io-surface 0.3.2
 - rust: objc2-quartz-core 0.3.2
+- rust: objc2-security 0.3.2
+- rust: objc2-service-management 0.3.2
 - rust: objc2-ui-kit 0.3.2
 - rust: objc2-user-notifications 0.3.2
 - rust: objc2-web-kit 0.3.2

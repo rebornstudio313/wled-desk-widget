@@ -23,7 +23,7 @@ try{
  await mkdir(resolve(root,'docs/screenshots'),{recursive:true});await page.mouse.click(330,465);
  await page.screenshot({path:resolve(root,'docs/screenshots/prototype-peek.png'),fullPage:true});
  const bounds=await page.getByLabel('Управление лампами',{exact:true}).boundingBox();assert.ok(bounds.width<=321&&bounds.height<=450,JSON.stringify(bounds));
- assert.equal(lamp1.sockets.size,1,'Both edges share a single upstream socket');
+ assert.equal(lamp1.sockets.size,2,'One state socket plus one shared Peek socket for both edges');
  async function pixels(side){return page.locator('.peek-'+side).evaluate(c=>{const x=c.getContext('2d');return Array.from(x.getImageData(0,0,1,c.height).data);});}
  assert.deepEqual((await pixels('left')).slice(0,4),[255,0,0,255]);assert.deepEqual(await pixels('left'),await pixels('right'));
  lamp1.setColors([[3,4,5],[10,20,30],[50,60,70]]);
@@ -37,12 +37,12 @@ try{
  assert.equal(lamp1.commands.length,requestCount,'Stalled stream is not reclaimed from another Peek client');
  lamp1.pause(false);await page.locator('.peek-left[data-status="live"]').waitFor();
  await page.getByLabel('Лампа на левом краю Peek').selectOption(await page.getByLabel('Лампа на правом краю Peek').inputValue());
- await waitUntil(()=>lamp1.sockets.size===0&&lamp2.sockets.size===1);
+ await waitUntil(()=>lamp1.sockets.size===1&&lamp2.sockets.size===2);
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
- await waitUntil(()=>lamp2.sockets.size===0);
- await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
  await waitUntil(()=>lamp2.sockets.size===1);
- await toggle.click();await waitUntil(()=>lamp2.sockets.size===0);
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
+ await waitUntil(()=>lamp2.sockets.size===2);
+ await toggle.click();await waitUntil(()=>lamp2.sockets.size===1);
  assert.equal(lamp1.patches.length+lamp2.patches.length,0,'Peek never changes lighting state');
  assert.ok([...lamp1.commands,...lamp2.commands].every(c=>JSON.stringify(c)==='{"lv":true}'));
  const forbidden=await fetch('http://127.0.0.1:1424/api/devices/not-a-device/peek',{headers:{Origin:'https://evil.example'}});assert.equal(forbidden.status,403);

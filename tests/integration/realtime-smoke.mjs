@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';import {spawn} from 'node:child_process';import {mkdtemp,writeFile,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {fixtureLamp} from '../fixtures/peek-lamp.mjs';
+const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const temp=await mkdtemp(join(tmpdir(),'wled-realtime-')),a=await fixtureLamp('Lamp A',[[1,2,3]],{effects:['Solid','Rainbow','Breathe']}),b=await fixtureLamp('Lamp B',[[1,2,3]],{effects:['Solid','Breathe','Rainbow']});let server,browser;
+try{
+ await writeFile(join(temp,'devices.json'),JSON.stringify({schemaVersion:1,devices:[{id:'a',name:'Lamp A',address:'http://'+a.address},{id:'b',name:'Lamp B',address:'http://'+b.address}]}));
+ server=spawn(process.execPath,['scripts/server.mjs'],{env:{...process.env,WIDGET_PORT:'1429',WIDGET_PROFILE_FILE:join(temp,'devices.json')},stdio:['ignore','pipe','pipe']});let output='';server.stdout.on('data',v=>output+=v);for(let i=0;i<100&&!output.includes('loopback only');i++)await new Promise(r=>setTimeout(r,40));assert.match(output,/loopback only/);
+ browser=await chromium.launch({channel:'msedge',headless:true});const page=await browser.newPage();await page.goto('http://127.0.0.1:1429');await page.waitForFunction(()=>document.querySelectorAll('.devices .connection-dot.online').length===2);
+ for(let i=0;i<100&&(!a.sockets.size||!b.sockets.size);i++)await new Promise(r=>setTimeout(r,20));assert.equal(a.sockets.size,1);assert.equal(b.sockets.size,1);
+ assert.equal(await page.locator('.widget-chrome button').count(),2,'Only mini and close in the window header');
+ assert.equal(await page.locator('.peek-sources select').count(),0,'No second device selector');
+ assert.equal(await page.locator('.power-section [role="switch"]').count(),1,'Visible power switch in the content');
+ const start=Date.now();a.external({bri:80,seg:[{id:0,fx:1,col:[[18,52,86]],sx:42,ix:77}]});
+ await page.getByRole('combobox',{name:'Эффект',exact:true}).filter({hasText:'Разные эффекты'}).waitFor({timeout:2000});assert.ok(Date.now()-start<2000,'Push update arrives before the five-second poll');
+ assert.equal(await page.getByLabel('HEX цвет',{exact:true}).getAttribute('placeholder'),'Разные цвета');
+ await page.locator('.devices').getByRole('button',{name:'Lamp A',exact:true}).click();
+ await page.getByRole('combobox',{name:'Эффект',exact:true}).filter({hasText:'Rainbow'}).waitFor();assert.equal(await page.getByLabel('HEX цвет',{exact:true}).inputValue(),'#123456');assert.equal(await page.getByLabel('Скорость эффекта',{exact:true}).inputValue(),'42');
+ a.external({on:false,seg:[{id:0,fx:2,col:[[80,90,100]],sx:55,ix:66}]});await page.getByRole('combobox',{name:'Эффект',exact:true}).filter({hasText:'Breathe'}).waitFor({timeout:2000});assert.equal(await page.getByRole('switch',{name:'Питание выбранных ламп'}).getAttribute('aria-checked'),'false');
+ await page.getByRole('button',{name:'Компактный режим',exact:true}).click();a.external({on:true,seg:[{id:0,fx:0,col:[[9,8,7]],sx:1,ix:2}]});await page.getByRole('combobox',{name:'Эффект',exact:true}).filter({hasText:'Solid'}).waitFor({timeout:2000});
+ a.disconnect();for(let i=0;i<150&&!a.sockets.size;i++)await new Promise(r=>setTimeout(r,20));await page.waitForTimeout(1200);a.external({seg:[{id:0,fx:1,col:[[3,4,5]],sx:1,ix:2}]});await page.getByRole('combobox',{name:'Эффект',exact:true}).filter({hasText:'Rainbow'}).waitFor({timeout:2000});
+ assert.equal(a.patches.length+b.patches.length,0,'Observing external changes never sends lighting commands');assert.ok([...a.commands,...b.commands].every(c=>!('on' in c)&&!('seg' in c)&&!('ps' in c)));
+ await page.getByRole('switch',{name:'Питание выбранных ламп'}).click();
+ await page.waitForFunction(()=>document.querySelector('[role="switch"]').getAttribute('aria-checked')==='false');
+ assert.equal(a.patches.at(-1).on,false,'Body switch sends power command to the selected lamp');
+ await b.close();await page.route('**/api/devices/b',route=>route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'Offline fixture'})}));
+ await page.reload();await page.locator('.power-title .connection-dot.offline').waitFor();
+ assert.match(await page.locator('.power-description').innerText(),/Lamp B: нет связи/);
+ await page.getByRole('button',{name:'Развернуть виджет',exact:true}).click();await page.locator('.devices .connection-dot.offline').waitFor();
+ console.log('Realtime passed: phone-like changes, immediate effect/HEX/parameters/power updates, mixed group values, compact mode, reconnect and zero lighting writes.');
+}finally{await browser?.close();server?.kill();await a.close();await b.close();await rm(temp,{recursive:true,force:true});}

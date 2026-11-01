@@ -1,0 +1,71 @@
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {createRequire} from 'node:module';
+import {fixtureLamp} from '../fixtures/peek-lamp.mjs';
+const require=createRequire(import.meta.url);
+const {chromium}=require('playwright');
+const root=fileURLToPath(new URL('../../',import.meta.url));
+const temp=await mkdtemp(join(tmpdir(),'wled-canvas-lamp-'));
+const a=await fixtureLamp('Лента A',[[255,0,0],[255,0,0]]),b=await fixtureLamp('Лента B',[[0,0,255],[0,0,255]]);
+let server,browser;
+async function wait(test,message){for(let i=0;i<100;i++){if(await test())return;await new Promise(r=>setTimeout(r,70));}assert.fail(message);}
+try{
+ await writeFile(join(temp,'devices.json'),JSON.stringify({schemaVersion:1,devices:[{id:'a',name:'Лента A',address:'http://'+a.address},{id:'b',name:'Лента B',address:'http://'+b.address}]}));
+ server=spawn(process.execPath,['scripts/server.mjs'],{cwd:root,env:{...process.env,WIDGET_PORT:'1441',WIDGET_PROFILE_FILE:join(temp,'devices.json')},stdio:['ignore','pipe','pipe'],windowsHide:true});
+ let output='';server.stdout.on('data',x=>output+=x);server.stderr.on('data',x=>output+=x);await wait(()=>output.includes('loopback only'),output);
+ browser=await chromium.launch({channel:'msedge',headless:true});
+ const page=await browser.newPage({viewport:{width:320,height:600},deviceScaleFactor:2}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:1441');
+ await page.getByRole('switch',{name:'Питание выбранных ламп'}).waitFor();
+ const widget=page.locator('.widget'),menu=page.getByRole('menu',{name:'Меню виджета'});
+ async function context(){await widget.click({button:'right',position:{x:160,y:60}});await menu.waitFor();}
+ await context();await menu.getByRole('menuitemcheckbox',{name:'Режим «Лампа»',exact:true}).click();
+ await page.locator('.lamp-mode-content[data-status="live"]').waitFor();
+ assert.equal(await page.locator('.peek-edge').count(),0,'Panel Peek is unmounted');
+ assert.equal(await page.locator('.controls').count(),0,'Panel controls are unmounted');
+ const energy=()=>page.locator('.lamp-widget-canvas').evaluate(c=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let r=0,g=0,b=0;for(let i=0;i<d.length;i+=4){r+=d[i]*d[i+3]/255;g+=d[i+1]*d[i+3]/255;b+=d[i+2]*d[i+3]/255;}return {r,g,b,corner:d[3]};});
+ await wait(async()=>{const p=await energy();return p.r>p.b*3;},'A is red');
+ assert.equal((await energy()).corner,0,'Transparent background');
+ await wait(()=>a.sockets.size===2&&b.sockets.size===1,'One Peek subscription for A and no stale B edge stream');
+ await context();await menu.getByRole('menuitemradio',{name:'Лента B',exact:true}).click();
+ await wait(async()=>{const p=await energy();return p.b>p.r*3;},'Selected B is blue');
+ await wait(()=>a.sockets.size===1&&b.sockets.size===2,'A released after selection');
+ b.setColors([[0,255,0],[0,255,0]]);
+ await wait(async()=>{const p=await energy();return p.g>p.b*3;},'New frame is green');
+ await page.screenshot({path:join(temp,'lamp-widget-integrated.png')});
+ const liveEnergy=await energy();b.external({on:false});
+ await page.locator('.lamp-mode-content[data-status="off"]').waitFor();
+ await wait(()=>b.sockets.size===1,'Off releases Peek');
+ await wait(async()=>{const p=await energy();return p.g<liveEnergy.g*.3;},'Off darkens material');
+ b.external({on:true});await page.locator('.lamp-mode-content[data-status="live"]').waitFor();
+ await page.reload();await page.locator('.lamp-mode-content[data-status="live"]').waitFor();
+ assert.equal(await page.locator('.lamp-mode-caption>span').innerText(),'Лента B','Mode and source persist');
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{value:true,configurable:true});document.dispatchEvent(new Event('visibilitychange'));});
+ await wait(()=>b.sockets.size===1,'Hidden releases Peek');
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{value:false,configurable:true});document.dispatchEvent(new Event('visibilitychange'));});
+ await page.locator('.lamp-mode-content[data-status="live"]').waitFor();
+ b.pause(true);await page.locator('.lamp-mode-content[data-status="stalled"]').waitFor({timeout:10000});
+ await wait(async()=>{const p=await energy();return p.g<liveEnergy.g*.3;},'Stale colors are cleared');
+ b.pause(false);await page.locator('.lamp-mode-content[data-status="live"]').waitFor();
+ await page.getByRole('button',{name:'Управление лампами',exact:true}).click();
+ await page.locator('.controls').waitFor();assert.equal(await page.locator('.lamp-widget-canvas').count(),0);
+ assert.deepEqual([...a.patches,...b.patches],[],'View and source switching never change actual light state');
+ assert.deepEqual(errors,[]);
+ // Check standalone adapter: invalid data and disposal do not schedule later paints.
+ await page.goto('http://127.0.0.1:1441/lamp-widget/lamp-calibration.json');
+ await page.goto('http://127.0.0.1:1441');
+ const adapter=await page.evaluate(async()=>{
+  const {createLampWidget}=await import('/lamp-widget/lamp-widget-host.mjs');
+  const c=document.createElement('canvas');c.style.cssText='width:160px;height:240px';document.body.append(c);
+  const lamp=createLampWidget(c);const bad=lamp.update({colors:['bad']});
+  lamp.update({colors:['#ff0000']});lamp.update({colors:['#0000ff']});lamp.destroy();
+  const before=c.toDataURL();await new Promise(r=>setTimeout(r,150));const unchanged=before===c.toDataURL();c.remove();
+  return {bad,unchanged,after:lamp.update({colors:['#ffffff']})};
+ });
+ assert.deepEqual(adapter,{bad:false,unchanged:true,after:false});
+ console.log('Passed: Canvas rendering, transparent background, real Peek frames, source switching, persistence, off/on, hidden/visible, stalled/recovery, disposal and read-only operation.');
+}finally{await browser?.close();server?.kill();await a.close();await b.close();await rm(temp,{recursive:true,force:true});}

@@ -1,0 +1,14 @@
+
+/* Transparent lamp mode. The host retains dragging, native sizing and its context menu. */
+.widget[data-lamp-mode="true"]{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;padding:0 8px 8px;overflow:visible}
+.widget[data-lamp-mode="true"]::before,.widget[data-lamp-mode="true"]::after{display:none}
+.lamp-mode-content{position:relative;display:flex;flex-direction:column;align-items:center;min-width:0}
+.lamp-widget-canvas{display:block;width:100%;height:auto;aspect-ratio:2/3;max-height:438px;outline-offset:-12px}
+.lamp-mode-caption{display:flex;flex-direction:column;align-items:center;gap:3px;max-width:100%;font-size:12px;line-height:16px;color:#c4dcea;text-shadow:0 1px 5px #000;pointer-events:none}
+.lamp-mode-caption>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lamp-mode-caption small{font-size:10px;color:#93aabe}
+.lamp-controls-return{margin-top:7px;border:0;background:transparent;color:#91afc4;font-size:10px;padding:3px 8px;border-radius:5px}
+.lamp-controls-return:hover{color:#e0f4ff;background:#25415966}
+.widget-context-menu .lamp-menu-label{display:block;padding:6px 8px 3px;font-size:10px;color:#8ba6bd}
+.widget-context-menu .lamp-source-item{font-size:12px}
+.widget-context-menu{max-height:calc(100vh - 8px);overflow:auto;overscroll-behavior:contain}

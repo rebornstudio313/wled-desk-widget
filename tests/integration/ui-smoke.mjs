@@ -42,8 +42,8 @@ try{
  await page.locator('.devices').getByRole('button',{name:'Test lamp',exact:true}).waitFor();
  assert.equal(JSON.parse(await readFile(join(temp,'devices.json'),'utf8')).devices.length,1);
  await page.getByRole('button',{name:'Закрыть настройки',exact:true}).click();
- await page.locator('.device-status[data-state="on"]').waitFor();
- assert.match(await page.locator('.device-status').innerText(),/Test lamp/);
+ await page.locator('.devices .connection-dot.online').waitFor();
+ assert.match(await page.locator('.devices').innerText(),/Test lamp/);
  // HEX and dragging must place the marker at the actual selected hue.
  const ring=page.locator('.hue-wheel'),marker=page.locator('.wheel-marker');
  async function verifyMarker(expectedHue,expectedColor){
@@ -69,11 +69,9 @@ try{
  await page.mouse.move(cx+r,cy);await page.mouse.down();await page.mouse.move(cx+r+40,cy);await page.mouse.up();
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
  await verifyMarker(180,'rgb(0, 255, 255)');
- const settingsBox=await page.getByRole('button',{name:'Настройки ламп',exact:true}).boundingBox();
- const powerBox=await page.getByRole('button',{name:'Питание выбранных ламп'}).boundingBox();
- const tabsBox=await page.getByRole('tablist').boundingBox();
- assert.ok(tabsBox.x+tabsBox.width<settingsBox.x && settingsBox.x+settingsBox.width<powerBox.x,'Header controls do not overlap');
- assert.equal(settingsBox.width,powerBox.width);assert.equal(settingsBox.y,powerBox.y);
+ assert.equal(await page.locator('.widget-chrome button').count(),2);
+ assert.equal(await page.locator('.power-section [role="switch"]').count(),1);
+ assert.equal(await page.getByRole('tablist').count(),0);
  await page.getByLabel('HEX цвет',{exact:true}).fill('#ff9e52');
  await page.getByLabel('HEX цвет',{exact:true}).press('Tab');
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
@@ -84,7 +82,7 @@ try{
  await page.mouse.click(3,3);
  await page.screenshot({path:resolve(root,'docs/screenshots/prototype-demo.png'),fullPage:true});
  const bounds=await page.getByLabel('Управление лампами',{exact:true}).boundingBox();
- assert.ok(bounds.width<=321 && bounds.height<=450,`Compact panel: ${JSON.stringify(bounds)}`);
+ assert.ok(bounds.width<=321 && bounds.height<=490,`Compact panel: ${JSON.stringify(bounds)}`);
  await page.setViewportSize({width:332,height:470});
  await page.mouse.click(330,465);
  await page.screenshot({path:resolve(root,'docs/screenshots/prototype-compact.png'),fullPage:true});
@@ -101,17 +99,17 @@ try{
  // Offline saved lamps also stay visible and must not fall back to demo.
  await page.route('**/api/devices/*',route=>route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'Fixture offline'})}));
  await page.reload();
- await page.locator('.devices .dot.offline').waitFor();
- await page.locator('.device-status[data-state="offline"]').waitFor();
+ await page.locator('.devices .connection-dot.offline').waitFor();
+ await page.locator('.devices .connection-dot.offline').waitFor();
  assert.ok(await page.getByRole('dialog',{name:'Настройки виджета'}).isHidden());
  assert.equal(await page.locator('.devices').getByRole('button',{name:'Test lamp',exact:true}).count(),1);
- assert.ok(await page.getByRole('button',{name:'Питание выбранных ламп'}).isDisabled());
+ assert.ok(await page.getByRole('switch',{name:'Питание выбранных ламп'}).isDisabled());
  await page.unroute('**/api/devices/*');
  await page.reload();await page.waitForFunction(()=>!document.querySelector('[aria-label="Питание выбранных ламп"]').disabled);
- await page.getByRole('button',{name:'Питание выбранных ламп'}).click();
+ await page.getByRole('switch',{name:'Питание выбранных ламп'}).click();
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
  assert.equal(state.on,false);
- await page.locator('.device-status[data-state="off"]').waitFor();
+ assert.equal(await page.getByRole('switch',{name:'Питание выбранных ламп'}).getAttribute('aria-checked'),'false');
  await page.getByLabel('HEX цвет',{exact:true}).fill('#00bbff');
  await page.getByLabel('HEX цвет',{exact:true}).press('Tab');
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
@@ -123,7 +121,6 @@ try{
  await page.mouse.up();
  await page.getByRole('status').filter({hasText:'Настройки применены'}).waitFor();
  assert.deepEqual(state.seg[0].col[0],[128,255,0],'Release sends final selected hue');
- await page.getByRole('tab',{name:/Эффекты/}).click();
  await page.getByRole('combobox',{name:'Эффект',exact:true}).press('ArrowDown');
  const effectList=page.getByRole('listbox',{name:'Эффект: список',exact:true});await effectList.waitFor();
  await effectList.press('End');await page.getByRole('option',{name:'Fixture effect 50',exact:true}).waitFor();

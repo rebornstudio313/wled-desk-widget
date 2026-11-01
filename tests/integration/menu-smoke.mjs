@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';import {spawn} from 'node:child_process';import {mkdtemp,writeFile,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {fixtureLamp} from '../fixtures/peek-lamp.mjs';
+const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const temp=await mkdtemp(join(tmpdir(),'wled-menu-')),lamp=await fixtureLamp('Lamp A',[[1,2,3]]);let browser,server;
+try{
+ await writeFile(join(temp,'devices.json'),JSON.stringify({schemaVersion:1,devices:[{id:'a',name:'Lamp A',address:'http://'+lamp.address}]}));
+ server=spawn(process.execPath,['scripts/server.mjs'],{env:{...process.env,WIDGET_PORT:'1430',WIDGET_PROFILE_FILE:join(temp,'devices.json')},stdio:['ignore','pipe','pipe']});let output='';server.stdout.on('data',v=>output+=v);for(let i=0;i<100&&!output.includes('loopback only');i++)await new Promise(r=>setTimeout(r,40));assert.match(output,/loopback only/);
+ browser=await chromium.launch({channel:'msedge',headless:true});const page=await browser.newPage({viewport:{width:320,height:490}});await page.goto('http://127.0.0.1:1430');await page.waitForFunction(()=>!document.querySelector('[role="switch"]')?.disabled);
+ const widget=page.locator('.widget'),menu=page.getByRole('menu',{name:'Меню виджета'});
+ await widget.click({button:'right',position:{x:310,y:400}});await menu.waitFor();
+ let box=await menu.boundingBox();assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=320&&box.y+box.height<=490,'Menu stays inside the widget viewport');
+ assert.equal(await menu.getByRole('menuitemcheckbox').count(),3);
+ assert.ok(await menu.getByRole('menuitemcheckbox',{name:'Поверх других окон',exact:true}).isDisabled(),'Browser cannot claim native pinning');
+ assert.equal(await menu.getByRole('menuitemcheckbox',{name:'Мини-режим',exact:true}).getAttribute('aria-checked'),'false');
+ await menu.getByRole('menuitemcheckbox',{name:'Мини-режим',exact:true}).click();await page.locator('.widget[data-compact="true"]').waitFor();assert.equal(await menu.count(),0);
+ const power=page.getByRole('switch',{name:'Питание выбранных ламп'});
+ assert.ok(await power.locator('.switch-track').isHidden(),'Mini uses a button, not a slider');
+ assert.ok(await power.locator('.mini-power-icon').isVisible());
+ const onBackground=await power.evaluate(e=>getComputedStyle(e).color);
+ await power.click();await page.waitForFunction(()=>document.querySelector('[role="switch"]').getAttribute('aria-checked')==='false');
+ const offBackground=await power.evaluate(e=>getComputedStyle(e).color);
+ assert.notEqual(offBackground,onBackground,'Off and on have different red/blue appearance');
+ assert.equal(offBackground,'rgb(255, 157, 171)','Red light when off');assert.equal(onBackground,'rgb(128, 221, 255)','Blue light when on');assert.equal(await power.evaluate(e=>getComputedStyle(e).borderTopWidth),'0px','Mini power has no border');assert.equal(await power.evaluate(e=>getComputedStyle(e).backgroundImage),'none','Mini power has no background');
+ await power.click();await page.waitForFunction(()=>document.querySelector('[role="switch"]').getAttribute('aria-checked')==='true');
+ assert.equal(await page.getByRole('button',{name:'Настройки ламп',exact:true}).evaluate(e=>getComputedStyle(e).borderTopWidth),'0px','Settings has no border');
+ assert.equal(await page.getByRole('button',{name:'Настройки ламп',exact:true}).locator('svg').evaluate(e=>getComputedStyle(e).width),'20px');
+ assert.equal((await page.locator('.widget-chrome>span').innerText()).trim(),'WLED Desk | Widget','Mini has full application name');
+ const chromeBox=await page.locator('.widget-chrome').boundingBox(),powerBox=await page.getByRole('switch',{name:'Питание выбранных ламп'}).boundingBox(),settingsBox=await page.getByRole('button',{name:'Настройки ламп',exact:true}).boundingBox(),expandBox=await page.getByRole('button',{name:'Развернуть виджет',exact:true}).boundingBox();
+ const nameBox=await page.locator('.widget-chrome>span').boundingBox();assert.ok(Math.abs(nameBox.y+nameBox.height/2-(powerBox.y+powerBox.height/2))<2,'Title and icons share a center line');assert.ok(nameBox.x+nameBox.width<=powerBox.x,'Title does not overlap power');assert.ok(Math.abs(powerBox.y-settingsBox.y)<2&&Math.abs(powerBox.y-expandBox.y)<2,'All actions share the same row');
+ assert.ok(powerBox.x+powerBox.width<=settingsBox.x&&settingsBox.x+settingsBox.width<=expandBox.x,'Header actions do not overlap');
+ assert.equal(await page.getByRole('button',{name:'Развернуть виджет',exact:true}).evaluate(e=>getComputedStyle(e).filter),'none','Expand icon has no glow');
+ assert.equal(await page.getByRole('button',{name:'Развернуть виджет',exact:true}).locator('svg').getAttribute('data-icon'),'expand','Mini uses outward expand arrows');
+
+ await widget.click({button:'right',position:{x:150,y:50}});assert.equal(await menu.getByRole('menuitemcheckbox',{name:'Развернуть виджет',exact:true}).getAttribute('aria-checked'),'true');
+ await page.keyboard.press('Escape');assert.equal(await menu.count(),0);
+ await widget.focus();await page.keyboard.press('Shift+F10');await menu.waitFor();await page.keyboard.press('Enter');await page.locator('.widget[data-compact="false"]').waitFor();
+ await widget.click({button:'right',position:{x:150,y:50}});await page.mouse.click(3,480);assert.equal(await menu.count(),0,'Outside click dismisses');
+ assert.deepEqual(lamp.patches.map(p=>p.on),[false,true],'Only explicit power clicks change the lamp');
+ assert.ok(await power.locator('.switch-track .app-icon--power').isVisible(),'Full switch contains power symbol');
+ console.log('Menu passed: right click, mini/expand, checked states, keyboard, Escape/outside close, viewport edges and no lamp writes.');
+}finally{await browser?.close();server?.kill();await lamp.close();await rm(temp,{recursive:true,force:true});}
