@@ -1,0 +1,62 @@
+name: Import alpha.3
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    if: github.repository == 'rebornstudio313/wled-desk-widget'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Verify and import reviewed source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import hashlib, stat, zipfile
+          archive = Path('wled-desk-widget-0.1.0-alpha.3-source.zip')
+          expected = '832b09601a375fbcc76280d4bacf1a5a1d993703d0ec8af460a444575a275280'
+          if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
+              raise SystemExit('Source archive checksum mismatch')
+          root = Path.cwd().resolve()
+          count = 0
+          with zipfile.ZipFile(archive) as source:
+              for member in source.infolist():
+                  parts = PurePosixPath(member.filename).parts
+                  if not parts or parts[0] != 'wled-desk-widget' or '..' in parts:
+                      raise SystemExit('Unsafe archive path')
+                  relative = PurePosixPath(*parts[1:])
+                  if stat.S_ISLNK(member.external_attr >> 16):
+                      raise SystemExit('Symlinks are not accepted')
+                  # Workflow files are uploaded separately by the repository owner.
+                  if relative.parts[:2] == ('.github', 'workflows'):
+                      continue
+                  if member.is_dir():
+                      continue
+                  destination = (root / str(relative)).resolve()
+                  if not destination.is_relative_to(root) or destination == root:
+                      raise SystemExit('Unsafe destination')
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  destination.write_bytes(source.read(member))
+                  count += 1
+          for obsolete in [
+              'apps/desktop/src/demo.ts',
+              'apps/desktop/src/DeviceStatus.tsx',
+              'apps/desktop/src-tauri/src/glass.rs',
+              'wled-desk-widget-0.1.0-alpha.1-source.zip',
+              'wled-desk-widget-0.1.0-alpha.3-source.zip',
+          ]:
+              (root / obsolete).unlink(missing_ok=True)
+          print(f'Imported {count} reviewed files; source SHA-256 verified')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- . ':!.github/workflows'
+          git diff --cached --stat
+          git commit -m 'Release alpha.3: autostart, live WLED controls and window fixes'
+          git push origin HEAD:main
